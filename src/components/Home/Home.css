@@ -1,0 +1,67 @@
+.container {
+    height: 100vh;
+    padding: 5rem;
+    box-sizing: border-box;
+}
+
+.vector-graphics {
+    height: 40vh !important;
+    width: 35% !important;
+    filter: drop-shadow(0 30px 10px rgba(0, 0, 0, 0.3));
+    animation: vector-animation 1s infinite ease-in-out alternate;
+}
+
+@keyframes vector-animation {
+    to {
+        transform: translateY(-10px)
+    }
+}
+
+.brandsbanner>svg {
+    color: white;
+    font-size: 4rem;
+    transition: color 0.3s;
+}
+
+.brandsbanner>svg:hover {
+    color: rgb(225, 221, 0);
+}
+
+.container2 {
+    height: 100vh !important;
+    width: 100% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container2 video {
+    border: 1px solid rgb(0, 0, 0, 0.18);
+    /* box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.393) !important; */
+    border-radius: 5px;
+    width: 60%;
+    outline: none;
+}
+
+@media screen and (max-width:600px) {
+    .container2 video {
+        width: 100%;
+        border: 0px;
+        /* box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.393) !important; */
+        border-radius: 0px;
+    }
+    .container2 {
+        padding: 5vh 0;
+        height: unset !important;
+    }
+    .vector-graphics {
+        height: 90vh !important;
+        width: 100% !important;
+        margin-bottom: 20% !important;
+        filter: drop-shadow(0 30px 10px rgba(0, 0, 0, 0.3));
+        animation: vector-animation 1s infinite ease-in-out alternate;
+    }
+    .brand-space {
+        margin-top: 10%;
+    }
+}

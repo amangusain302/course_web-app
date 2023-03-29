@@ -26,7 +26,7 @@ const LinkButton = ({ url = '/', title = 'Home', onClose }) => {
 const Header = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const isAuthenticated = true;
+  const isAuthenticated = false;
   const user = {
     name: 'Aman',
     role: 'admin',
@@ -43,6 +43,7 @@ const Header = () => {
       <Button
         onClick={onOpen}
         colorScheme={'yellow'}
+        zIndex={'100'}
         width="12"
         height={'12'}
         rounded="full"

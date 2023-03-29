@@ -65,3 +65,14 @@
         margin-top: 10%;
     }
 }
+
+.course {
+    width: 250px;
+    margin-bottom: 1rem;
+    transition: all 0.5s;
+}
+
+.course:hover {
+    transform: translateY(-10px);
+    /* box-shadow: 1px 3px 15px 0px rgba(0, 0, 0, 0.217); */
+}

@@ -45,7 +45,10 @@ const Home = () => {
 
       <div className="container2">
         <video
-        controls
+        autoPlay
+        muted
+        controls={false}
+        loop
         src={introVideo}
         controlsList="nodownload nofullscreen noremoteplayback"
         disablePictureInPicture

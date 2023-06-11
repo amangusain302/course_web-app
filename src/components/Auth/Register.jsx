@@ -10,6 +10,9 @@ import {
   } from '@chakra-ui/react';
   import React, { useState } from 'react';
   import { Link } from 'react-router-dom';
+  import {useDispatch } from 'react-redux';
+import { useCookies } from 'react-cookie';
+import { register } from '../../redux/action/user';
 
 
   export const fileUploadCss ={
@@ -31,8 +34,21 @@ import {
     const [name, setName] = useState('');
     const [imagePrev, setImagePrev] = useState('');
     const [image, setImage] = useState('');
+    const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  const dispatch = useDispatch();
 
+    const submitHandler = (e) => {
+      e.preventDefault();
+      const myForm = new FormData();
 
+      myForm.append('name', name);
+      myForm.append('email', email);
+      myForm.append('password', password);
+      myForm.append('file', image);
+
+      dispatch(register(myForm, setCookie));
+
+    }
     const changeImageHandler = (e) => {
       const file = e.target.files[0];
       const reader = new FileReader();
@@ -47,7 +63,7 @@ import {
       <Container h={'100%'}>
         <VStack h={'full'} justifyContent="center" spacing={'16'}>
           <Heading children={'Registration'} textTransform={'uppercase'} />
-          <form style={{ width: '100%' }}>
+          <form style={{ width: '100%' }} onSubmit={submitHandler}>
             <Box my={4} display={"flex"} justifyContent={"center"}>
                 <Avatar src={imagePrev} size={"2xl"}/>
             </Box>

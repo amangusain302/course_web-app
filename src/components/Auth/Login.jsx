@@ -8,16 +8,25 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import React, { useState } from 'react';
+import {useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { login } from '../../redux/action/user';
+import { useCookies } from 'react-cookie';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+      const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  const dispatch = useDispatch();
+  const submitHandler = async(e) => {
+    e.preventDefault();
+    dispatch(login(email, password, setCookie))
+  }
   return (
     <Container h={'84.6vh'}>
       <VStack h={'full'} justifyContent="center" spacing={'16'}>
         <Heading children={'Welcome to Coures Web'} />
-        <form style={{ width: '100%' }}>
+        <form onSubmit={submitHandler} style={{ width: '100%' }}>
           <Box marginY={4}>
             <FormLabel htmlFor="email" children="Email Addresss" />
             <Input
@@ -38,7 +47,7 @@ const Login = () => {
               id="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="Enter Your Password"
+              placeholder="Enter Your Password" 
               type={'password'}
               focusBorderColor="yellow.500"
             />

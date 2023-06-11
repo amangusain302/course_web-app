@@ -10,7 +10,13 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useLocation } from 'react-router-dom';
+import { getAllCourse } from '../../redux/action/course';
+import { toast } from 'react-hot-toast';
+import { addToPlaylist } from '../../redux/action/profile';
+import { getMyProfile } from '../../redux/action/user';
 
 const Course = ({
   views,
@@ -20,8 +26,13 @@ const Course = ({
   addToPlaylistHandler,
   creator,
   description,
+  loading,
   lectureCount,
+  index,
+  click
 }) => {
+
+  console.log(id)
   return (
     <VStack className="course" alignItems={['center', 'flex-start']}>
       <Image src={imageSrc} boxSize="60" objectFit={'contain'} />
@@ -62,8 +73,7 @@ const Course = ({
         <Link to={`/course/${id}`} >
           <Button colorScheme={'yellow'}>Watch Now</Button>
         </Link>
-          <Button variant={'ghost'} colorScheme={'yellow'} onClick={() => addToPlaylistHandler(id)}>Add to playlist</Button>
-
+          <Button isLoading={click===index ? loading : false} variant={'ghost'} colorScheme={'yellow'} onClick={() => addToPlaylistHandler(id, index)}>Add to playlist</Button>
       </Stack>
     </VStack>
   );
@@ -72,8 +82,14 @@ const Course = ({
 const Courses = () => {
   const [keyword, setKeyword] = useState('');
   const [category, setCategory] = useState('');
-const addToPlaylistHandler = (id) => {
-  console.log("add to playlist done")
+  const [click, setClick] = useState('');
+  const dispatch = useDispatch();
+  const {state} = useLocation();
+
+const addToPlaylistHandler = async(courseId, clickIndex) => {
+  await dispatch(addToPlaylist(courseId));
+  dispatch(getMyProfile());
+  setClick(clickIndex);
 }
   
   const categories = [
@@ -84,6 +100,27 @@ const addToPlaylistHandler = (id) => {
     'Data Science',
     'Game Development',
   ];
+
+  const {loading, courses=[], error, message} = useSelector(state => state.courses)
+
+  useEffect( () => {
+    dispatch(getAllCourse(category, keyword));
+
+    if(error){
+      toast.error(error);
+      dispatch({type : "clearError"});
+    }
+    if(state){
+      toast.error(state);
+      dispatch({type : "clearError"});
+    }
+
+    if(message){
+      toast.success(message);
+      dispatch({type : "clearMessage"});
+    }
+
+  }, [category, keyword, dispatch, state, error, message])
   return (
     <Container minH={'95vh'} maxW="container.lg" paddingY={'8'}>
       <Heading children="All Courses" m={'8'} />
@@ -115,16 +152,24 @@ const addToPlaylistHandler = (id) => {
         justifyContent={['flex-start', 'space-evenly']}
         alignItems={['center', 'flex-start ']}
       >
-        <Course
-          title={'Sample'}
-          description={'sample'}
-          view={'23'}
-          imageSrc={'https://images.pexels.com/photos/5905713/pexels-photo-5905713.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'}
-          id={'sample'}
-          creator={'sampleBoy'}
-          lectureCount={'2'}
+       {
+        (courses.length > 0) ? 
+         courses.map( (item, index) => (
+          <Course
+          title={item.title}
+          description={item.description}
+          views={item.views}
+          imageSrc={item.poster.url}
+          id={item._id}
+          creator={item.createdBy}
+          lectureCount={item.numOfVideos}
+          loading={loading}
+          click={click}
           addToPlaylistHandler={addToPlaylistHandler}
+          index={index}
         />
+        )) : <Heading mt={4} children={"Course Not Found"}/>
+       }
       </Stack>
     </Container>
   );

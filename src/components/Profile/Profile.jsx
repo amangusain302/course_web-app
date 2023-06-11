@@ -18,41 +18,81 @@ import {
   VStack,
   useDisclosure,
 } from '@chakra-ui/react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RiDeleteBin7Fill } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
 import { fileUploadCss } from '../Auth/Register';
+import { useDispatch, useSelector } from 'react-redux';
+import { removeFromPlaylist, updateProfilePicture } from '../../redux/action/profile';
+import { cancelSubscription, getMyProfile } from '../../redux/action/user';
+import { toast } from 'react-hot-toast';
 
-const Profile = () => {
-  const user = {
-    name: 'Aman',
-    email: 'amangusain@gmail.com',
-    createdAt: String(new Date().toISOString()),
-    role: 'user',
-    subscription: {
-      status: 'active',
-    },
-    playlist: [
-      {
-        course: 'travelling',
-        poster:
-          'https://images.freeimages.com/images/large-previews/a61/glowing-bridge-and-town-on-the-sunset-background-1639953.jpg',
-      },
-      {
-        course: 'Mountain Climbing',
-        poster:
-          'https://images.freeimages.com/variants/5RSj8u49jqEFqqVrDyntydjd/f4a36f6589a0e50e702740b15352bc00e4bfaf6f58bd4db850e167794d05993d',
-      },
-    ],
-  };
+const Profile = ({user}) => {
+  console.log(user, "profile data")
+  // const user = {
+  //   name: 'Aman',
+  //   email: 'amangusain@gmail.com',
+  //   createdAt: String(new Date().toISOString()),
+  //   role: 'user',
+  //   subscription: {
+  //     status: 'active',
+  //   },
+  //   playlist: [
+  //     {
+  //       course: 'travelling',
+  //       poster:
+  //         'https://images.freeimages.com/images/large-previews/a61/glowing-bridge-and-town-on-the-sunset-background-1639953.jpg',
+  //     },
+  //     {
+  //       course: 'Mountain Climbing',
+  //       poster:
+  //         'https://images.freeimages.com/variants/5RSj8u49jqEFqqVrDyntydjd/f4a36f6589a0e50e702740b15352bc00e4bfaf6f58bd4db850e167794d05993d',
+  //     },
+  //   ],
+  // };
+  const dispatch = useDispatch();
 
   const removeFromPlaylistHandler = id => {
     console.log(id);
+    dispatch(removeFromPlaylist(id));
+    dispatch(getMyProfile());
   };
-  const changeImageSubmitHandler = (e , image) => {
+
+  var {loading, message , error} = useSelector(state => state.profile);
+  const {loading : subLoading, message: subMessage , error : subError} = useSelector(state => state.subscription);
+  loading = subLoading;
+  message = subMessage;
+  error = subError;
+
+  console.log(subMessage , "ggggg")
+
+  const changeImageSubmitHandler = async(e , image) => {
     e.preventDefault();
-    console.log(image)
+    const myProfilePicture = new FormData();
+
+    myProfilePicture.append('file', image);
+
+    await dispatch(updateProfilePicture(myProfilePicture));
+    dispatch(getMyProfile());
+    // console.log(image)
   }
+
+  const cancelSubscriptionHandler = async () => {
+    await dispatch(cancelSubscription());
+    dispatch(getMyProfile());
+  }
+
+
+  useEffect(() => {
+    if(error){
+      toast.error(error);
+      dispatch({type:"clearError"})
+    } 
+    if(message){
+      toast.success(message);
+      dispatch({type:"clearMessage"})
+    }
+  }, [dispatch,error, message])
 
   const {isOpen, onClose , onOpen} = useDisclosure()
 
@@ -67,8 +107,8 @@ const Profile = () => {
         padding={'8'}
       >
         <VStack>
-          <Avatar boxSize={'48'} />
-          <Button colorScheme={'yellow'} variant={'ghost'} onClick={onOpen}>
+          <Avatar boxSize={'48'} src={user.avatar.url}/>
+          <Button colorScheme={'yellow'} variant={'ghost'}  onClick={onOpen}>
             Change Photo
           </Button>
         </VStack>
@@ -84,13 +124,13 @@ const Profile = () => {
           </HStack>
           <HStack>
             <Text children="Created At" fontWeight={'bold'} />
-            <Text children={user.createdAt.split('T')[0]} />
+            <Text children={user.CreatedAt.split('T')[0]} />
           </HStack>
           {user.role !== 'admin' && (
             <HStack>
               <Text children="Subscription" fontWeight={'bold'} />
-              {user.subscription.status === 'active' ? (
-                <Button color={'yellow.500'} variant={'unstyled'}>
+              {user.subscription?.status === 'active' ? (
+                <Button color={'yellow.500'} isLoading={loading} onClick={cancelSubscriptionHandler} variant={'unstyled'}>
                   Cancel Subscription
                 </Button>
               ) : (
@@ -127,7 +167,7 @@ const Profile = () => {
               />
               <HStack>
                 <Link to={`/course/${element.course}`}>
-                  <Button variant={'ghost'} colorScheme={'yellow'}>
+                  <Button  variant={'ghost'} colorScheme={'yellow'}>
                     Watch Now
                   </Button>
                 </Link>
@@ -141,13 +181,13 @@ const Profile = () => {
           ))}
         </Stack>
       )}
-      <ChangePhotoBox changeImageSubmitHandler={changeImageSubmitHandler} isOpen={isOpen} onClose={onClose}/>
+      <ChangePhotoBox changeImageSubmitHandler={changeImageSubmitHandler} loading={loading} isOpen={isOpen} onClose={onClose}/>
     </Container>
   );
 };
 
 export default Profile;
-function ChangePhotoBox({isOpen, onClose, changeImageSubmitHandler}) {
+function ChangePhotoBox({isOpen, onClose, changeImageSubmitHandler, loading}) {
 
     const [image, setImage] = useState("")
     const [imagePrev, setImagePrev] = useState("")
@@ -187,7 +227,7 @@ function ChangePhotoBox({isOpen, onClose, changeImageSubmitHandler}) {
                   css={{ '&::file-selector-button': fileUploadCss}}
                   onChange={changeImage}
                 />
-                <Button w="full" colorScheme='yellow' type='submit'>Change</Button>
+                <Button isLoading={loading} w="full" colorScheme='yellow' type='submit'>Change</Button>
               </VStack>
             </form>
           </Container>

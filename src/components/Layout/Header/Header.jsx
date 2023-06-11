@@ -14,6 +14,9 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../../redux/action/user';
+import { useCookies } from 'react-cookie';
 
 const LinkButton = ({ url = '/', title = 'Home', onClose }) => {
   return (
@@ -23,18 +26,13 @@ const LinkButton = ({ url = '/', title = 'Home', onClose }) => {
   );
 };
 
-const Header = () => {
+const Header = ({isAuthenticated = false, user}) => {
+  const dispatch = useDispatch();
   const { isOpen, onOpen, onClose } = useDisclosure();
-
-  const isAuthenticated = true;
-  const user = {
-    name: 'Aman',
-    role: 'admin',
-  };
-
-  const logOutHandler = () => {
-    console.log("log out")
+  const [cookies, setCookie, removeCookie] = useCookies(['token']);
+const logOutHandler = () => {
     onClose();
+    dispatch(logout(removeCookie));
   }
 
   return (
